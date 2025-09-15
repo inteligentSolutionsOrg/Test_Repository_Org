@@ -1,0 +1,48 @@
+import groovy.transform.Field
+
+@Field String dockerFile = "config/docker/Dockerfile"
+@Field String nameImage = "webhook_api_artifact"
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Login Docker Hub') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'docker-user',  variable: 'DOCKER_USER'),
+                    string(credentialsId: 'docker-webhook', variable: 'DOCKER_TOKEN')
+                ]) {
+                    script {
+
+                        sh """
+                            echo \$DOCKER_TOKEN | docker login -u \$DOCKER_USER --password-stdin
+                        """
+                        env.DOCKER_USER = "${DOCKER_USER}"
+                    }
+                }
+            }
+        }
+
+        stage('Build & Push') {
+            steps {
+                script {
+                    def buildDate = sh(script: "date +%Y%m%d", returnStdout: true).trim()
+                    def tag = "${buildDate}-${env.BUILD_NUMBER}-dev"
+                    def fullImage = "${env.DOCKER_USER}/${nameImage}:${tag}"
+
+                    sh """
+                        echo "Construyendo imagen ${fullImage}"
+                        docker build -f ${dockerFile} -t ${fullImage} .
+                    """
+
+                    sh """
+                        docker push ${fullImage}
+                    """
+                }
+            }
+        }
+    }
+}
+
+# prueba 1
