@@ -36,7 +36,7 @@ pipeline {
                         docker build -f ${dockerFile} -t ${fullImage} .
                     """
 
-                    sh """
+                    sh """saddsasad
                         docker push ${fullImage}
                     """
                 }
