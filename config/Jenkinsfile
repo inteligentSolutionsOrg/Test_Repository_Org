@@ -40,7 +40,7 @@ pipeline {
                         docker push ${fullImage}
                     """
                 }
-            }
+            }c<zxcxz
         }
     }
 }sdaadssad
